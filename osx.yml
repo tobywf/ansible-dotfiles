@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become_method: sudo
+  vars_files:
+  - vars/osx.yml
+  roles:
+  - role: osx
+  - role: fonts
+  - role: fish
+  #- role: common

@@ -1,0 +1,45 @@
+---
+- name: check distribution
+  fail: msg="only for Linux"
+  when: ansible_distribution == "MacOSX"
+
+- name: stop user directories from regenerating
+  copy:
+    src: "{{ item }}"
+    dest: "~/.config/{{ item }}"
+    mode: 0644
+  with_items:
+  - user-dirs.conf
+  - user-dirs.dirs
+  become: no
+
+- name: rename existing folders
+  command: mv ~/{{ item.old }} ~/{{ item.new }}
+  args:
+    creates: ~/{{ item.new }}
+    removes: ~/{{ item.old }}
+  with_items:
+    - { old: 'Documents', new: 'documents' }
+    - { old: 'Downloads', new: 'downloads' }
+  become: no
+
+- name: remove other folders
+  file:
+    path: "~/{{ item }}"
+    state: absent
+  with_items:
+  - Desktop
+  - Music
+  - Pictures
+  - Public
+  - Templates
+  - Videos
+  become: no
+
+- name: make new folders
+  file:
+    path: "~/{{ item }}"
+    state: directory
+  with_items:
+  - code
+  become: no

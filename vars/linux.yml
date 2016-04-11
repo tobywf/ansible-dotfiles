@@ -1,0 +1,5 @@
+font_destination: ~/.local/share/fonts/
+sublime_settings: ~/.config/sublime-text-3/
+backup:
+- ~/ibm/notes/data/*.ID
+- ~/.ssh/*

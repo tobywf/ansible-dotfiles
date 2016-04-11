@@ -1,0 +1,15 @@
+---
+- name: osx | install fish
+  homebrew: name=fish state=present
+  become: no
+
+- name: osx | get fish path
+  shell: echo $(brew --prefix)/bin/fish
+  register: fish_path
+  changed_when: no
+  become: no
+
+- name: osx | add fish path to /etc/shells
+  lineinfile: dest=/etc/shells line={{ fish_path.stdout }}
+  when: not fish_path|skipped
+  become: yes

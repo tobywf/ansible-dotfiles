@@ -1,0 +1,53 @@
+dotfile_root: ~/.local/share/dotfiles/
+font_sources:
+- name: googlefonts
+  repo: https://github.com/google/fonts.git
+  fonts:
+  - ofl/alegreya
+  - ofl/alegreyasans
+  - ofl/alegreyasanssc
+  - ofl/alegreyasc
+  - ofl/anonymouspro
+  - ofl/arvo
+  - ofl/cabin
+  - ofl/cinzel
+  - ofl/cinzeldecorative
+  - ofl/fanwoodtext
+  - ofl/firamono
+  - ofl/firasans
+  - ofl/karla
+  - ofl/lato
+  - ofl/librebaskerville
+  - ofl/librecaslontext
+  - ofl/lindenhill
+  - ofl/lora
+  - ofl/merriweather
+  - ofl/merriweathersans
+  - ofl/montserrat
+  - ofl/montserratalternates
+  - ofl/orbitron
+  - ofl/oswald
+  - ofl/playfairdisplay
+  - ofl/playfairdisplaysc
+  - ofl/quicksand
+  - ofl/raleway
+  - ofl/ralewaydots
+  - ofl/sourcecodepro
+  - ofl/sourcesanspro
+  - ofl/sourceserifpro
+  - ofl/telex
+  - ofl/vollkorn
+  - apache/droidsans
+  - apache/droidsansmono
+  - apache/droidserif
+  - apache/opensans
+  - apache/opensanscondensed
+  - apache/roboto
+  - apache/robotocondensed
+  - apache/robotomono
+  - apache/robotoslab
+- name: powerline
+  repo: https://github.com/powerline/fonts.git
+  fonts:
+    - AnonymousPro
+    - SourceCodePro

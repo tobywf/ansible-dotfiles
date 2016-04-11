@@ -1,0 +1,58 @@
+---
+# use homebrew with versions cask instead!
+- name: osx | check if sublime-text 3 is installed
+  stat:
+    path: /Applications/Sublime Text.app
+  register: sublime_text_path
+  changed_when: no
+  become: no
+
+- name: osx | create temporary directory
+  shell: mktemp -d -t 'sublime'
+  register: temp_path
+  changed_when: no
+  when: not sublime_text_path.stat.exists
+  become: no
+
+- name: osx | download sublime-text 3 dmg
+  get_url:
+    url: http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%20Build%203083.dmg
+    dest: "{{ temp_path.stdout }}/sublime-text.dmg"
+    mode: 0600
+    validate_certs: no
+  when: not temp_path|skipped
+  become: no
+
+- name: osx | mount sublime-text 3 dmg
+  command: hdiutil attach {{ temp_path.stdout }}/sublime-text.dmg
+  args:
+    creates: /Volumes/Sublime Text
+  when: not temp_path|skipped
+  become: no
+
+- name: osx | install sublime-text 3
+  command: cp -R "/Volumes/Sublime Text/Sublime Text.app" /Applications
+  args:
+    creates: /Applications/Sublime Text.app
+  when: not temp_path|skipped
+  become: yes
+
+- name: osx | unmount sublime-text 3 dmg
+  command: hdiutil detach "/Volumes/Sublime Text"
+  args:
+    removes: /Volumes/Sublime Text
+  when: not temp_path|skipped
+  become: no
+
+- name: osx | link sublime-text 3
+  file:
+    src: /Applications/Sublime Text.app/Contents/SharedSupport/bin/subl
+    dest: /usr/local/bin/subl
+    state: link
+  become: yes
+
+- name: osx | delete temporary directory
+  file: name={{ temp_path.stdout }} state=absent
+  when: not temp_path|skipped
+  changed_when: no
+  become: no

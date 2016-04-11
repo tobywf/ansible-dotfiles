@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become_method: sudo
+  vars_files:
+  - vars/linux.yml
+  roles:
+  - role: user-dirs
+  - role: mint
+  - role: fonts
+  - role: fish
+  #- role: common
+  - role: broken-thinkpads
+  - role: ocdc

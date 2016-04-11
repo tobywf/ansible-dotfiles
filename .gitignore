@@ -1,0 +1,3 @@
+.vagrant/
+*.py[co]
+roles/ocdc/

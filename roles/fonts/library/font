@@ -1,0 +1,94 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+import fnmatch
+import os
+import os.path
+import json
+import errno
+
+from ansible.module_utils.basic import *
+
+
+def filenames(font_dir, dest_dir):
+    filenames = []
+    try:
+        # google font?
+        with open(os.path.join(font_dir, 'METADATA.json'), 'rb') as f:
+            metadata = json.load(f, encoding='utf-8')
+    except IOError as e:
+        if e.errno != errno.ENOENT:
+            raise
+        else:  # some other font?
+            filenames = fnmatch.filter(os.listdir(font_dir), '*.[to]tf')
+    else:
+        filenames = (font['filename'] for font in metadata['fonts'])
+    return (
+        (os.path.join(font_dir, filename), os.path.join(dest_dir, filename))
+        for filename in filenames
+    )
+
+
+def main():
+    module = AnsibleModule(
+        argument_spec={
+            'state': {'default': 'present', 'choices': ['present', 'absent']},
+            'name': {'required': True, 'type': 'str'},
+            'src': {'required': True, 'type': 'str'},
+            'dest': {'required': True, 'type': 'str'},
+        },
+        supports_check_mode=True
+    )
+    args = module.params
+    state = args['state'] == 'present'
+    try:
+        font_dir = os.path.abspath(os.path.join(
+            os.path.expanduser(args['src']),
+            args['name']
+        ))
+        dest_dir = os.path.abspath(os.path.expanduser(args['dest']))
+        try:
+            paths = filenames(font_dir, dest_dir)
+        except OSError as e:
+            # possible directory doesn't exist because in check mode
+            if module.check_mode and e.errno == errno.ENOENT:
+                module.exit_json(changed=True)
+                return
+        if module.check_mode:
+            # lazy, isfile check
+            changed = any(
+                os.path.isfile(dest_path) != state
+                for src_path, dest_path in paths
+            )
+        else:
+            changed = False
+            # forgiveness is easier than permission
+            for src_path, dest_path in paths:
+                if state:
+                    try:
+                        os.symlink(src_path, dest_path)
+                    except OSError as e:
+                        if e.errno == errno.EEXIST:
+                            pass
+                        else:
+                            raise
+                    else:
+                        changed = True
+                else:
+                    try:
+                        os.remove(dest_path)
+                    except OSError as e:
+                        if e.errno == errno.ENOENT:
+                            pass
+                        else:
+                            raise
+                    else:
+                        changed = True
+    except Exception as e:
+        module.fail_json(msg=e.message)
+    else:
+        module.exit_json(changed=changed)
+
+
+if __name__ == '__main__':
+    main()

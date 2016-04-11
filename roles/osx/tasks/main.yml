@@ -1,0 +1,57 @@
+---
+- name: update taps
+  homebrew_tap: tap={{ item }} state=present
+  with_items: homebrew.taps
+  become: no
+
+- name: install brews
+  homebrew:
+    name: "{{ item.key }}"
+    state: present
+    install_options: "{{ item.value }}"
+    update_homebrew: yes
+  with_dict: homebrew.brews
+  become: no
+
+# https://github.com/caskroom/homebrew-cask/issues/15930
+- name: "homebrew-cask issue #15930"
+  command: "{{ item }}"
+  with_items:
+  - brew update
+  - brew cleanup
+  - brew cask cleanup
+  - brew uninstall --force brew-cask
+  - brew update
+  changed_when: no
+  become: no
+
+- name: install casks
+  homebrew_cask: name={{ item }} state=present
+  with_items: homebrew.casks
+  become: no
+
+- name: cleanup casks
+  command: brew cask cleanup
+  changed_when: no
+  become: no
+
+- name: copy osx specific gitconfig
+  copy:
+    src: gitconfig
+    dest: /etc/gitconfig
+    mode: 0644
+  become: yes
+
+# https://github.com/mathiasbynens/dotfiles/blob/master/.osx
+
+- name: system customisation
+  command: "{{ item }}"
+  changed_when: no
+  become: no
+  with_items: "{{ system_cust }}"
+
+- name: system customisation (sudo)
+  command: "{{ item }}"
+  changed_when: no
+  become: yes
+  with_items: "{{ system_sudo }}"

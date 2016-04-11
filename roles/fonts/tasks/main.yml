@@ -1,0 +1,25 @@
+---
+- name: download font repositories
+  git:
+    repo: "{{ item.repo }}"
+    depth: 1
+    dest: "{{ font_store }}{{ item.name }}/"
+  with_items: font_sources
+  become: no
+
+- name: create font destination
+  file: path={{ font_destination }} state=directory mode=0700
+  become: no
+
+- name: link fonts from repositories
+  font: name={{ item.1 }} src={{ font_store }}{{ item.0.name }}/ dest={{ font_destination }}
+  with_subelements:
+  - font_sources
+  - fonts
+  become: no
+
+- name: ubuntu | update font cache
+  command: fc-cache -f -v
+  changed_when: no
+  when: ansible_distribution == "Ubuntu" or ansible_distribution == "Linuxmint"
+  become: no

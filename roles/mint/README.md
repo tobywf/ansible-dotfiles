@@ -1,0 +1,4 @@
+Mint setup
+==========
+
+Dependencies: apt

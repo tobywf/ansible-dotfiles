@@ -1,0 +1,36 @@
+---
+- include: osx.yml
+  when: ansible_distribution == "MacOSX"
+
+- include: ubuntu.yml
+  when: ansible_distribution == "Ubuntu" or ansible_distribution == "Linuxmint"
+
+- name: change shell to fish
+  user: shell={{ fish_path.stdout }} name={{ ansible_user_id }}
+  when: not fish_path|skipped
+  become: yes
+
+- name: download fisherman
+  git:
+    repo: https://github.com/fisherman/fisherman
+    depth: 1
+    dest: ~/.local/share/fisherman/
+    force: yes
+  become: no
+
+- name: install fisherman
+  command: make
+  args:
+    chdir: ~/.local/share/fisherman/
+    creates: ~/.config/fisherman/
+  become: no
+
+- name: install powerline-status
+  pip: name=powerline-status
+  become: yes
+
+- name: install prompt
+  command: fish -c 'fisher install tobywf/fish-ps'
+  args:
+    creates: ~/.config/fisherman/cache/ps/
+  become: no

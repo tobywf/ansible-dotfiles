@@ -1,0 +1,4 @@
+font_destination: ~/Library/Fonts/
+sublime_settings: ~/Library/Application Support/Sublime Text 3/
+backup:
+- ~/.ssh/*

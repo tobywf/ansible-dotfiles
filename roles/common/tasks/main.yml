@@ -1,0 +1,51 @@
+---
+- name: ssh folder permissions
+  file:
+    path: ~/.ssh
+    state: directory
+    mode: 0700
+  become: no
+
+- name: create dotfile target directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  with_items:
+  - ~/.config/git/
+  - "{{ sublime_settings }}Packages/User/"
+  become: no
+
+- name: symlink dotfiles
+  file:
+    src: "{{ dotfile_root }}dotfiles/{{ item.name }}"
+    dest: "{{ item.dest }}{{ item.name }}"
+    state: link
+    force: yes
+  with_items:
+  - { name: '.tmux.conf', dest: '~/' }
+  - { name: 'git/config', dest: '~/.config/' }
+  - { name: 'git/ignore', dest: '~/.config/' }
+  become: no
+
+- name: check sublime settings directory
+  stat:
+    path: "{{ sublime_settings }}Packages/User"
+  changed_when: no
+  register: user_dir
+  become: no
+
+- name: remove sublime settings directory
+  file:
+    path: "{{ sublime_settings }}Packages/User"
+    state: absent
+  when: user_dir.stat.isdir is defined and user_dir.stat.isdir
+  become: no
+
+- name: symlink sublime settings directory
+  file:
+    src: "{{ dotfile_root }}dotfiles/sublime"
+    dest: "{{ sublime_settings }}Packages/User"
+    force: yes
+    state: link
+  become: no

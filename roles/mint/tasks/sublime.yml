@@ -1,0 +1,34 @@
+---
+- name: check if sublime-text 3 is installed
+  command: dpkg-query -W sublime-text
+  register: sublime_text_deb
+  failed_when: sublime_text_deb.rc > 1
+  changed_when: sublime_text_deb.rc == 1
+  become: no
+
+- name: create temporary directory
+  shell: mktemp -d
+  register: temp_path
+  changed_when: no
+  when: not sublime_text_deb|skipped and sublime_text_deb.rc == 1
+  become: no
+
+- name: download sublime-text 3
+  get_url:
+    url: http://c758482.r82.cf2.rackcdn.com/sublime-text_build-3083_amd64.deb
+    dest: "{{ temp_path.stdout }}/sublime-text3.deb"
+    mode: 0600
+    validate_certs: no
+  when: not temp_path|skipped
+  become: no
+
+- name: install sublime-text 3
+  apt: deb={{ temp_path.stdout }}/sublime-text3.deb
+  when: not temp_path|skipped
+  become: yes
+
+- name: delete temporary directory
+  file: name={{ temp_path.stdout }} state=absent
+  when: not temp_path|skipped
+  changed_when: no
+  become: no

@@ -1,0 +1,26 @@
+---
+- name: ubuntu | add fish repository
+  apt_repository: repo=ppa:fish-shell/release-2 state=present
+  when: ansible_distribution == "Ubuntu"
+  become: yes
+
+# python-apt can't handle Linux Mint :/
+- name: ubuntu | add fish repository (hack)
+  command: apt-add-repository -y ppa:fish-shell/release-2
+  args:
+    creates: /etc/apt/sources.list.d/fish-shell-release-2-*.list
+  when: ansible_distribution == "Linuxmint"
+  changed_when: no
+  become: yes
+
+- name: ubuntu | install fish
+  apt: pkg=fish state=present update_cache=yes
+  become: yes
+
+# fish automatically added to /etc/shells via ppa
+
+- name: ubuntu | get fish path
+  shell: which fish
+  register: fish_path
+  changed_when: no
+  become: no
